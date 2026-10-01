@@ -1,0 +1,75 @@
+CHANGE THE DATABASE PASSWORD
+============================
+
+WHY
+
+  That password was written inside scripts published in public
+  repositories. It has been taken out of them - but a repository keeps
+  its history, so the old value can still be read by anyone who looks
+  back through it. Removing a secret from today's files does not
+  un-publish what was already published.
+
+  The only real fix is to change it. That is what this does.
+
+HOW BAD IS IT
+
+  Low. The database only accepts connections from inside that machine,
+  so this password on its own gets nobody in from outside - they would
+  already have to be on the Gov box. There is no sign of anything
+  untoward.
+
+  But it is a government system going live on 29 October, and "the
+  database password was published and never changed" is not a sentence
+  anyone wants in an audit.
+
+WHAT TO DO
+
+  1. Double-click CHECK-FIRST.bat
+     It looks and reports. It changes nothing at all. It will tell you
+     whether PostgREST on that machine uses the account being changed.
+
+  2. Double-click CHANGE-DB-PASSWORD.bat
+     It asks for the current password (or finds it, if you have already
+     run SET-DB-PASSWORD.bat), then asks you to choose a new one twice.
+     Nothing shows on screen as you type.
+
+  At least 12 characters. Avoid the ' character.
+
+WHAT IT DOES, IN ORDER
+
+  checks the current password works - and stops if it does not
+  reads what PostgREST actually connects as
+  changes the password
+  connects again with the new one to prove it took
+  SAVES the new password on the machine, immediately
+  updates the PostgREST configuration - only if it genuinely uses
+    that account, and keeping the old file as .before_rotate
+  restarts PostgREST, if it needed changing
+  checks HCIS is still answering
+
+  Saving comes before the PostgREST steps on purpose. From the moment
+  the password changes, the important thing is that the new one is
+  written down. An earlier version did it the other way round and a
+  test caught it: the restart failed, the script stopped, and the new
+  password was never saved - which would have left a database nobody
+  could reach.
+
+ONE THING I GOT WRONG EARLIER
+
+  I told Evans this would need the PostgREST configuration updating,
+  and that getting it wrong would take HCIS offline.
+
+  On the office server that is not true: PostgREST there connects as a
+  limited account called "authenticator", not as postgres, so changing
+  the postgres password does not affect it at all.
+
+  I cannot read the Gov box, so this script does not assume either way.
+  It looks at what PostgREST on that machine actually uses and only
+  touches the configuration if it has to. CHECK-FIRST.bat will tell you
+  which case you are in before anything changes.
+
+IF SOMETHING GOES WRONG
+
+  The previous PostgREST configuration is kept next to the original as
+  .before_rotate. The new password is saved at C:\HCIS\db-password.txt.
+  Send me a photo of the window and I will sort it.
